@@ -40,17 +40,25 @@ static NSString * const FORMSegmentBackgroundColorKey = @"background_color";
     self.segment.enabled = !field.disabled;
     self.disabled = field.disabled;
     
-    NSInteger selectedIndex = [self.segment selectedSegmentIndex];
-    
     [self.segment removeAllSegments];
 
     [field.values enumerateObjectsUsingBlock:^(FORMFieldValue *value, NSUInteger index, BOOL *stop) {
         [self.segment insertSegmentWithTitle:value.title atIndex:index animated:NO];
-
-        if (selectedIndex || selectedIndex == 0) {
-            [self.segment setSelectedSegmentIndex:selectedIndex];
-        } else if (value.defaultValue) {
-            [self.segment setSelectedSegmentIndex:index];
+        
+        if ([field.value isKindOfClass:[FORMFieldValue class]]) {
+            FORMFieldValue *fieldValue = (FORMFieldValue *)field.value;
+            if (fieldValue.value != nil) {
+                if ([value identifierIsEqualTo:field.value]) {
+                    [self.segment setSelectedSegmentIndex:index];
+                }
+            } else if (value.defaultValue) {
+                field.value = value.valueID;
+                [self.segment setSelectedSegmentIndex:index];
+            }
+        } else {
+            if ([value identifierIsEqualTo:field.value]) {
+                [self.segment setSelectedSegmentIndex:index];
+            }
         }
     }];
     
